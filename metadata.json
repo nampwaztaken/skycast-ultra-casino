@@ -1,0 +1,7 @@
+{
+  "name": "levicanexpress plus",
+  "description": "67",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
