@@ -23,8 +23,8 @@ const App: React.FC = () => {
       }
 
       if (firebaseUser) {
-        // Real-time listener for user document in Firestore
-        unsubDoc = onSnapshot(doc(db, 'users', firebaseUser.uid), (snapshot) => {
+        // Real-time listener for user document in Firestore - updated to 'casinousers'
+        unsubDoc = onSnapshot(doc(db, 'casinousers', firebaseUser.uid), (snapshot) => {
           if (snapshot.exists()) {
             setUserProfile(snapshot.data() as UserProfile);
           }
@@ -49,7 +49,8 @@ const App: React.FC = () => {
     const finalBalance = Math.max(0, nextBalance);
     
     try {
-      await updateDoc(doc(db, 'users', userProfile.uid), {
+      // Updated to 'casinousers'
+      await updateDoc(doc(db, 'casinousers', userProfile.uid), {
         balance: finalBalance
       });
     } catch (err) {

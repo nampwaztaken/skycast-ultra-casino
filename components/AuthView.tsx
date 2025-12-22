@@ -31,7 +31,8 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
 
       if (isLogin) {
         const userCred = await signInWithEmailAndPassword(auth, authEmail, password);
-        const userDoc = await getDoc(doc(db, 'users', userCred.user.uid));
+        // Reading from 'casinousers'
+        const userDoc = await getDoc(doc(db, 'casinousers', userCred.user.uid));
         if (userDoc.exists()) {
           onSuccess(userDoc.data());
         } else {
@@ -49,8 +50,8 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
           joinedDate: new Date().toISOString()
         };
         
-        // Save all info to Firestore
-        await setDoc(doc(db, 'users', userCred.user.uid), initialData);
+        // Writing to 'casinousers'
+        await setDoc(doc(db, 'casinousers', userCred.user.uid), initialData);
         onSuccess(initialData);
       }
     } catch (err: any) {
@@ -75,7 +76,7 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
             Fun Money Making <br/><span className="text-amber-500">Website</span>
           </h1>
           <p className="text-slate-500 text-[10px] font-black tracking-[0.4em] uppercase mt-4 opacity-50">
-            {isLogin ? 'A subsidary of Jet3Holidays & LevEx' : 'Charlie Kirky incorporated'}
+            {isLogin ? 'A subsidiary of Jet3Holidays & LevEx' : 'Charlie Kirky incorporated'}
           </p>
         </div>
 
