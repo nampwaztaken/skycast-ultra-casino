@@ -5,10 +5,10 @@ import CasinoView from './components/CasinoView';
 import AuthView from './components/AuthView';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, increment, collection, getDocs, writeBatch, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, increment, setDoc } from 'firebase/firestore';
 
 // CURRENT CLIENT VERSION
-const APP_VERSION = 105;
+const APP_VERSION = 107;
 
 const App: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -18,6 +18,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // 1. Version Check & System Config Listener
+    // This stays here as it's a passive check for all clients
     const unsubConfig = onSnapshot(doc(db, 'system', 'config'), (snapshot) => {
       if (snapshot.exists()) {
         const config = snapshot.data() as SystemConfig;
@@ -28,7 +29,7 @@ const App: React.FC = () => {
           setSystemAlert(config.alertMessage);
         }
       } else {
-        // Initialize config if it doesn't exist (First run helper)
+        // Initialize config if it doesn't exist
         setDoc(doc(db, 'system', 'config'), {
           minRequiredVersion: APP_VERSION,
           maintenanceMode: false
@@ -36,37 +37,7 @@ const App: React.FC = () => {
       }
     });
 
-    // 2. Admin Console Tool: setRequiredVersion(v)
-    // Run 'await setRequiredVersion(106)' to force everyone to refresh
-    (window as any).setRequiredVersion = async (version: number) => {
-      console.log(`%c [ADMIN] %c Pushing new protocol requirement: v${version}...`, "color: #000; background: #fbbf24; font-weight: bold;", "color: #fbbf24;");
-      try {
-        await setDoc(doc(db, 'system', 'config'), { minRequiredVersion: version }, { merge: true });
-        console.log(`%c [SUCCESS] %c Version v${version} is now mandatory.`, "color: #000; background: #10b981; font-weight: bold;", "color: #10b981;");
-      } catch (err) {
-        console.error("Failed to push update:", err);
-      }
-    };
-
-    // 3. Admin Console Tool: systemResetBalances()
-    (window as any).systemResetBalances = async () => {
-      console.log("%c [ADMIN] %c Starting global balance reset...", "color: #000; background: #fbbf24; font-weight: bold;", "color: #fbbf24;");
-      try {
-        const querySnapshot = await getDocs(collection(db, 'casinousers'));
-        const batch = writeBatch(db);
-        let count = 0;
-        querySnapshot.forEach((userDoc) => {
-          batch.update(doc(db, 'casinousers', userDoc.id), { balance: 10000 });
-          count++;
-        });
-        await batch.commit();
-        console.log(`%c [SUCCESS] %c Reset ${count} users to 10,000.`, "color: #000; background: #10b981; font-weight: bold;", "color: #10b981;");
-      } catch (err) {
-        console.error("Admin reset failed:", err);
-      }
-    };
-
-    // 4. Auth State Listener
+    // 2. Auth State Listener
     let unsubDoc: (() => void) | undefined;
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       if (unsubDoc) {
@@ -120,7 +91,7 @@ const App: React.FC = () => {
           <h2 className="text-red-500 font-black uppercase tracking-[0.4em] text-xs mb-4">Protocol Error 409</h2>
           <h1 className="text-3xl font-black text-white italic tracking-tighter mb-6 uppercase">Outdated Core Detected</h1>
           <p className="text-slate-400 text-sm leading-relaxed mb-10 font-medium">
-            Your terminal is running an expired security protocol (v{APP_VERSION}). To maintain asset integrity and wealth-sync, you must initialize the latest core update.
+            Your terminal is running an expired security protocol (v{APP_VERSION}). To maintain asset integrity, you must initialize the latest core update.
           </p>
           <button 
             onClick={() => window.location.reload()}
