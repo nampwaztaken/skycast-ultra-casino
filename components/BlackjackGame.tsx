@@ -34,17 +34,17 @@ const calculateHand = (hand: Card[]) => {
 
 const AnimatedCard: React.FC<{ card: Card, hidden?: boolean, delay: number }> = ({ card, hidden, delay }) => (
   <div 
-    className="relative w-14 h-20 sm:w-24 sm:h-32 transition-all duration-700 ease-out animate-card-slide"
+    className="relative w-20 h-28 md:w-24 md:h-32 transition-all duration-700 ease-out animate-card-slide"
     style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
   >
     <div className={`relative w-full h-full preserve-3d transition-transform duration-700 ${hidden ? '' : 'rotate-y-180'}`}>
-      <div className="absolute inset-0 bg-blue-900 rounded-lg sm:rounded-xl border-2 border-blue-400 flex items-center justify-center backface-hidden shadow-xl">
-        <span className="text-2xl sm:text-4xl opacity-20">🎴</span>
+      <div className="absolute inset-0 bg-blue-900 rounded-xl border-2 border-blue-400 flex items-center justify-center backface-hidden shadow-xl">
+        <span className="text-4xl opacity-20">🎴</span>
       </div>
-      <div className="absolute inset-0 bg-white rounded-lg sm:rounded-xl border-2 border-gray-200 rotate-y-180 backface-hidden flex flex-col p-1 sm:p-2 text-black shadow-2xl">
-        <span className="font-black text-[10px] sm:text-xs">{card.rank}</span>
-        <span className="text-xl sm:text-3xl self-center my-auto">{card.suit}</span>
-        <span className="font-black text-[10px] sm:text-xs self-end rotate-180">{card.rank}</span>
+      <div className="absolute inset-0 bg-white rounded-xl border-2 border-gray-200 rotate-y-180 backface-hidden flex flex-col p-2 text-black shadow-2xl">
+        <span className="font-black text-xs">{card.rank}</span>
+        <span className="text-3xl self-center my-auto">{card.suit}</span>
+        <span className="font-black text-xs self-end rotate-180">{card.rank}</span>
       </div>
     </div>
   </div>
@@ -56,10 +56,10 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   const [dealerHand, setDealerHand] = useState<Card[]>([]);
   const [gameState, setGameState] = useState<'IDLE' | 'PLAYING' | 'DEALER_TURN' | 'ENDED'>('IDLE');
   const [message, setMessage] = useState('');
-  const [bet, setBet] = useState<number>(100);
+  const [bet, setBet] = useState(100);
 
   const startNewGame = async () => {
-    if (balance < bet || bet <= 0) return;
+    if (balance < bet || bet < 1) return;
     setBalance(prev => prev - bet);
     const newDeck = createDeck();
     setPlayerHand([]);
@@ -125,68 +125,73 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   }, [gameState]);
 
   return (
-    <div className="bg-[#0a0a10] border border-blue-500/10 rounded-[2rem] sm:rounded-[4rem] p-6 sm:p-10 w-full max-w-2xl shadow-2xl flex flex-col items-center relative overflow-hidden">
-      <div className="w-full flex justify-between mb-8 sm:mb-12 relative z-10">
-        <div className="flex -space-x-6 sm:-space-x-12">
+    <div className="bg-[#0a0a10] border-2 border-blue-500/10 rounded-[4rem] p-10 w-full max-w-2xl shadow-2xl flex flex-col items-center relative overflow-hidden">
+      <div className="absolute -top-12 -right-12 w-48 h-64 bg-blue-900/10 rounded-[3rem] border border-blue-400/5 rotate-[25deg] flex items-center justify-center -z-0">
+        <span className="text-white opacity-5 font-black italic tracking-tighter text-3xl mt-12">SHOE</span>
+      </div>
+
+      <div className="w-full flex justify-between mb-12 relative z-10">
+        <div className="flex -space-x-12">
           {dealerHand.map((c, i) => (
             <AnimatedCard key={c.id} card={c} delay={i * 200} hidden={gameState === 'PLAYING' && i === 1} />
           ))}
         </div>
-        <div className="text-right flex flex-col justify-center pr-2 sm:pr-6">
-          <p className="text-[8px] sm:text-[10px] font-black opacity-30 uppercase tracking-[0.3em] text-blue-400 mb-1">Dealer</p>
-          <p className="text-3xl sm:text-5xl font-black text-blue-100">{gameState === 'PLAYING' ? '?' : calculateHand(dealerHand)}</p>
+        <div className="text-right flex flex-col justify-center pr-6">
+          <p className="text-[10px] font-black opacity-30 uppercase tracking-[0.3em] text-blue-400 mb-1">Dealer</p>
+          <p className="text-5xl font-black text-blue-100">{gameState === 'PLAYING' ? '?' : calculateHand(dealerHand)}</p>
         </div>
       </div>
 
-      <div className="h-12 sm:h-16 flex items-center justify-center my-4 sm:my-6 text-center">
-        <p className="text-2xl sm:text-4xl font-black italic tracking-tighter text-blue-400 uppercase">{message}</p>
+      <div className="h-16 flex items-center justify-center my-6 text-center">
+        <p className="text-4xl font-black italic tracking-tighter text-blue-400 uppercase animate-pulse">{message}</p>
       </div>
 
-      <div className="w-full flex justify-between mb-8 sm:mb-12 relative z-10">
-        <div className="flex -space-x-6 sm:-space-x-12">
+      <div className="w-full flex justify-between mb-12 relative z-10">
+        <div className="flex -space-x-12">
           {playerHand.map((c, i) => (
             <AnimatedCard key={c.id} card={c} delay={i * 200} />
           ))}
         </div>
-        <div className="text-right flex flex-col justify-center pr-2 sm:pr-6">
-          <p className="text-[8px] sm:text-[10px] font-black opacity-30 uppercase tracking-[0.3em] text-blue-400 mb-1">Player</p>
-          <p className="text-4xl sm:text-7xl font-black text-white">{calculateHand(playerHand)}</p>
+        <div className="text-right flex flex-col justify-center pr-6">
+          <p className="text-[10px] font-black opacity-30 uppercase tracking-[0.3em] text-blue-400 mb-1">Player</p>
+          <p className="text-7xl font-black text-white">{calculateHand(playerHand)}</p>
         </div>
       </div>
 
       <div className="flex flex-col w-full relative z-10 space-y-4">
         {gameState === 'IDLE' || gameState === 'ENDED' ? (
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-end">
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 items-end">
             <div className="flex flex-col flex-1 w-full">
-              <label className="text-[8px] sm:text-[10px] font-black uppercase text-blue-400 mb-1 px-2">Bet Size</label>
+              <label className="text-[10px] font-black uppercase text-blue-400 mb-2 px-2">Bet Size</label>
               <input 
                 type="number" 
                 value={bet === 0 ? '' : bet} 
                 onChange={e => {
-                  const val = parseInt(e.target.value);
+                  const val = parseFloat(e.target.value);
                   setBet(isNaN(val) ? 0 : val);
                 }}
-                className="w-full bg-black/60 border border-blue-500/30 rounded-xl sm:rounded-2xl py-3 sm:py-5 px-4 sm:px-6 text-lg sm:text-xl font-black text-blue-400 outline-none"
+                className="w-full bg-black/60 border border-blue-500/30 rounded-2xl py-5 px-6 text-xl font-black text-blue-400 outline-none"
+                placeholder="0"
               />
             </div>
-            <button onClick={startNewGame} className="w-full sm:flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-4 sm:py-5 rounded-xl sm:rounded-2xl shadow-xl transition-all uppercase italic tracking-tighter text-lg sm:text-2xl">
-              DEAL
+            <button onClick={startNewGame} className="w-full md:flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl shadow-xl transition-all h-[68px] uppercase italic tracking-tighter text-2xl">
+              Initiate Deal
             </button>
           </div>
         ) : (
-          <div className="flex space-x-4 sm:space-x-6">
-            <button onClick={hit} className="flex-1 bg-white text-black font-black py-4 sm:py-6 rounded-xl sm:rounded-2xl hover:bg-gray-100 transition-all uppercase italic tracking-tighter text-xl sm:text-3xl active:scale-95">Hit</button>
-            <button onClick={stand} className="flex-1 bg-blue-900 border-2 border-blue-400 text-white font-black py-4 sm:py-6 rounded-xl sm:rounded-2xl hover:bg-blue-800 transition-all uppercase italic tracking-tighter text-xl sm:text-3xl active:scale-95">Stand</button>
+          <div className="flex space-x-6">
+            <button onClick={hit} className="flex-1 bg-white text-black font-black py-6 rounded-2xl hover:bg-gray-100 transition-all uppercase italic tracking-tighter text-3xl shadow-xl active:scale-95">Hit</button>
+            <button onClick={stand} className="flex-1 bg-blue-900 border-2 border-blue-400 text-white font-black py-6 rounded-2xl hover:bg-blue-800 transition-all uppercase italic tracking-tighter text-3xl shadow-xl active:scale-95">Stand</button>
           </div>
         )}
       </div>
 
       <style>{`
         @keyframes card-slide {
-          0% { transform: translate(100px, -100px) rotate(15deg); opacity: 0; }
+          0% { transform: translate(300px, -300px) rotate(30deg); opacity: 0; }
           100% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
         }
-        .animate-card-slide { animation: card-slide 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .animate-card-slide { animation: card-slide 0.7s cubic-bezier(0.19, 1, 0.22, 1); }
         .preserve-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }

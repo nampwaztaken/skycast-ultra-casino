@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from './types';
 import CasinoView from './components/CasinoView';
 import AuthView from './components/AuthView';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 
 const App: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -14,14 +15,12 @@ const App: React.FC = () => {
     let unsubDoc: (() => void) | undefined;
     
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
-      // Clear any existing doc listener when auth state changes
       if (unsubDoc) {
         unsubDoc();
         unsubDoc = undefined;
       }
 
       if (firebaseUser) {
-        // Real-time listener for user document in Firestore - using 'casinousers' collection
         unsubDoc = onSnapshot(doc(db, 'casinousers', firebaseUser.uid), (snapshot) => {
           if (snapshot.exists()) {
             setUserProfile(snapshot.data() as UserProfile);
@@ -43,13 +42,18 @@ const App: React.FC = () => {
   const updateBalance = async (updater: number | ((prev: number) => number)) => {
     if (!userProfile) return;
     
-    const nextBalance = typeof updater === 'function' ? updater(userProfile.balance) : updater;
-    const finalBalance = Math.max(0, nextBalance);
+    // Calculate the delta locally to send an atomic increment to Firestore
+    // This prevents race conditions where rapid updates overwrite each other
+    const currentBalance = userProfile.balance;
+    const nextBalance = typeof updater === 'function' ? updater(currentBalance) : updater;
+    const delta = nextBalance - currentBalance;
     
+    if (delta === 0) return;
+
     try {
-      // Sync balance to 'casinousers' collection
+      // Use Firestore increment for atomic, server-side math
       await updateDoc(doc(db, 'casinousers', userProfile.uid), {
-        balance: finalBalance
+        balance: increment(delta)
       });
     } catch (err) {
       console.error("Failed to sync balance to Firestore:", err);
@@ -62,12 +66,10 @@ const App: React.FC = () => {
     </div>
   );
 
-  // Directly show Auth if not logged in
   if (!userProfile) {
     return <AuthView onSuccess={setUserProfile} />;
   }
 
-  // Show Casino directly if authenticated
   return (
     <CasinoView 
       balance={userProfile.balance} 

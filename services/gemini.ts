@@ -1,6 +1,66 @@
 import {GoogleGenAI} from "@google/genai";
 
 /**
+ * Fetches real-time weather data using Gemini's search grounding capability.
+ */
+export const getRealWeather = async (city: string) => {
+  const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Search for the current weather in ${city}. Provide the data as a JSON object with keys: city, temp (as a number in Celsius), condition, humidity, windSpeed.`,
+      config: {
+        tools: [{googleSearch: {}}],
+      },
+    });
+
+    // The guideline warns that text might not be pure JSON when using search grounding.
+    // We use a regex to extract the JSON block safely.
+    const text = response.text || "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const data = jsonMatch ? JSON.parse(jsonMatch[0]) : {
+      city: city,
+      temp: 20,
+      condition: "Atmospheric sync active",
+      humidity: "50%",
+      windSpeed: "10 km/h"
+    };
+
+    // Extract grounding sources for UI display as required by Search Grounding rules
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
+      ?.filter(chunk => chunk.web)
+      ?.map(chunk => ({
+        uri: chunk.web!.uri,
+        title: chunk.web!.title || "Weather Source"
+      })) || [];
+
+    return { ...data, sources };
+  } catch (error) {
+    console.error("Failed to fetch orbital weather data:", error);
+    return null;
+  }
+};
+
+/**
+ * Generates futuristic AI insight for weather conditions.
+ */
+export const getAIWeatherInsight = async (city: string, condition: string, temp: number) => {
+  const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `The weather in ${city} is currently ${condition} at ${temp}°C. Generate a witty, short futuristic survival advice.`,
+      config: {
+        systemInstruction: "You are a cybernetic orbital weather station. Tone: Sharp, futuristic, brief. Max 10 words.",
+      },
+    });
+    return response.text || "Scanning atmospheric patterns...";
+  } catch (error) {
+    return "Orbital data link unstable.";
+  }
+};
+
+/**
  * Generates a witty market/wealth insight using Gemini 3 Flash.
  */
 export const getCasinoFortune = async (balance: number, win: number) => {
@@ -27,69 +87,5 @@ export const getCasinoFortune = async (balance: number, win: number) => {
   } catch (error) {
     console.error("Gemini Error:", error);
     return win > 0 ? "Exceptional yield! Your portfolio is expanding." : LOCAL_QUOTES[Math.floor(Math.random() * LOCAL_QUOTES.length)];
-  }
-};
-
-/**
- * Fetches real-time weather using Google Search grounding.
- * Required for queries about recent/real-time events like current weather.
- */
-export const getRealWeather = async (city: string) => {
-  try {
-    const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
-    // Use Search Grounding for current weather as it is real-time information.
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `What is the current weather in ${city}? Provide city name, temperature in Celsius, condition, humidity, and wind speed.`,
-      config: {
-        tools: [{googleSearch: {}}],
-      }
-    });
-
-    const text = response.text || "";
-    
-    // Extract grounding sources as required by Google GenAI guidelines.
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => ({
-      uri: chunk.web?.uri,
-      title: chunk.web?.title
-    })).filter((s: any) => s.uri) || [];
-
-    // Simple text parsing since JSON response is not guaranteed when using search grounding.
-    const tempMatch = text.match(/(-?\d+(\.\d+)?)\s*°?C/i);
-    const humidityMatch = text.match(/(\d+)\s*%/);
-    const conditionMatch = text.match(/condition[:\s]+([^\n.,]+)/i);
-    const windMatch = text.match(/wind[:\s]+([^\n.,]+)/i);
-    
-    return {
-      city: city,
-      temp: tempMatch ? parseFloat(tempMatch[1]) : 20,
-      condition: conditionMatch ? conditionMatch[1].trim() : "Clear",
-      humidity: humidityMatch ? `${humidityMatch[1]}%` : "45%",
-      windSpeed: windMatch ? windMatch[1].trim() : "10 km/h",
-      sources
-    };
-  } catch (error) {
-    console.error("Weather Fetch Error:", error);
-    return null;
-  }
-};
-
-/**
- * Generates an AI insight for weather based on current atmospheric parameters.
- */
-export const getAIWeatherInsight = async (city: string, condition: string, temp: number) => {
-  try {
-    const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `The weather in ${city} is ${condition} at ${temp}°C. Give a futuristic orbital station commander's report. Max 15 words.`,
-      config: {
-        systemInstruction: "You are the commander of the orbital weather station SKYCAST. Your tone is futuristic, robotic, and professional.",
-      }
-    });
-    return response.text || "Synchronizing with orbital sensors...";
-  } catch (error) {
-    console.error("Gemini Insight Error:", error);
-    return "Atmospheric data synchronization complete.";
   }
 };

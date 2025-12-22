@@ -13,10 +13,10 @@ const SlotMachine: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   const [reelPositions, setReelPositions] = useState<number[]>([0, 0, 0]);
   const [isSpinning, setIsSpinning] = useState<boolean[]>([false, false, false]);
   const [lastResult, setLastResult] = useState<string | null>(null);
-  const [bet, setBet] = useState<number>(20);
+  const [bet, setBet] = useState(20);
 
   const spin = () => {
-    if (balance < bet || bet <= 0 || isSpinning.some(s => s)) return;
+    if (balance < bet || bet < 0.1 || isSpinning.some(s => s)) return;
 
     setBalance(prev => prev - bet);
     setLastResult(null);
@@ -114,16 +114,17 @@ const SlotMachine: React.FC<Props> = ({ balance, setBalance, onWin }) => {
 
       <div className="flex w-full max-w-sm space-x-4">
         <div className="flex-1">
-          <label className="text-[10px] font-black uppercase text-purple-400/60 mb-2 block tracking-[0.2em] px-2 text-center">Stake</label>
+          <label className="text-[10px] font-black uppercase text-purple-400/60 mb-2 block tracking-[0.2em] px-2 text-center">Amount to Bet</label>
           <input 
             type="number"
             value={bet === 0 ? '' : bet}
             onChange={(e) => {
-              const val = parseInt(e.target.value);
+              const val = parseFloat(e.target.value);
               setBet(isNaN(val) ? 0 : val);
             }}
             disabled={isSpinning.some(s => s)}
             className="w-full bg-black/60 border border-white/10 rounded-2xl py-5 px-6 text-xl font-black text-white outline-none focus:border-purple-500/50 text-center"
+            placeholder="0"
           />
         </div>
         <button
