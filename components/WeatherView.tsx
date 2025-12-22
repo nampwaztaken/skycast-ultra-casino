@@ -7,14 +7,16 @@ interface Props {
   onLogin: (name: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onSecretTrigger: () => void;
 }
 
-const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChange }) => {
+const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChange, onSecretTrigger }) => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [insight, setInsight] = useState("Synchronizing with orbital sensors...");
   const [loading, setLoading] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
   const [tempName, setTempName] = useState("");
+  const [logoClicks, setLogoClicks] = useState(0);
 
   const fetchWeather = async (city: string) => {
     setLoading(true);
@@ -43,6 +45,18 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
     }
   };
 
+  const handleLogoClick = () => {
+    const nextClicks = logoClicks + 1;
+    if (nextClicks >= 5) {
+      onSecretTrigger();
+      setLogoClicks(0);
+    } else {
+      setLogoClicks(nextClicks);
+      // Reset clicks after 3 seconds of inactivity
+      setTimeout(() => setLogoClicks(0), 3000);
+    }
+  };
+
   return (
     <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#020617] min-h-screen flex flex-col items-center p-6 text-white font-sans">
       <div className="w-full max-w-md">
@@ -57,7 +71,7 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
               <p className="font-bold text-sm">{user.isLoggedIn ? user.username : "Guest User"}</p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right cursor-pointer select-none active:scale-95 transition-transform" onClick={handleLogoClick}>
             <h1 className="text-xl font-black italic tracking-tight text-blue-400">SKYCAST ULTRA</h1>
             <p className="text-[8px] font-bold opacity-30 uppercase tracking-[0.2em]">Atmos Monitor v4.2</p>
           </div>

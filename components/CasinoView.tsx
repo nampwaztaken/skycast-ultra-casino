@@ -28,10 +28,10 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
   }, []);
 
   const games = [
-    { id: 'PLINKO', name: 'GRAVITY WEALTH', desc: 'Exponential physics-based yield generation', icon: '☄️', color: 'from-amber-600 to-amber-900', seed: 'wealth-drop' },
-    { id: 'MINES', name: 'SECTOR GAINS', desc: 'Strategic high-risk asset recovery ops', icon: '💣', color: 'from-emerald-600 to-emerald-950', seed: 'wealth-mine' },
-    { id: 'BLACKJACK', name: 'ELITE 21', desc: 'Precision decision card-based arbitration', icon: '♠️', color: 'from-slate-700 to-slate-950', seed: 'wealth-21' },
-    { id: 'POKER', name: 'VAULT HOLDEM', desc: 'Ultimate deck verification and strategy', icon: '🃏', color: 'from-rose-600 to-rose-950', seed: 'wealth-holdem' },
+    { id: 'PLINKO', name: 'PLINKO', desc: 'Exponential physics-based yield generation', icon: '☄️', color: 'from-amber-600 to-amber-900', seed: 'wealth-drop' },
+    { id: 'MINES', name: 'MINES', desc: 'Strategic high-risk asset recovery ops', icon: '💣', color: 'from-emerald-600 to-emerald-950', seed: 'wealth-mine' },
+    { id: 'BLACKJACK', name: 'BLACKJACK', desc: 'Precision decision card-based arbitration', icon: '♠️', color: 'from-slate-700 to-slate-950', seed: 'wealth-21' },
+    { id: 'POKER', name: 'ONLINE POKER', desc: 'Ultimate deck verification and strategy', icon: '🃏', color: 'from-rose-600 to-rose-950', seed: 'wealth-holdem' },
   ] as const;
 
   const renderGame = () => {
@@ -63,8 +63,8 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
           </div>
           
           <div className="bg-white/5 border border-white/10 px-6 py-2.5 rounded-2xl flex items-center space-x-4 shadow-2xl">
-            <span className="text-amber-500 text-[10px] font-black uppercase tracking-[0.2em]">Liquid Assets</span>
-            <span className="text-white font-black tabular-nums tracking-tight text-xl">${balance.toLocaleString()}</span>
+            <span className="text-amber-500 text-[10px] font-black uppercase tracking-[0.2em]">Money</span>
+            <span className="text-white font-black tabular-nums tracking-tight text-xl">Ł{balance.toLocaleString()}</span>
           </div>
           
           <button 

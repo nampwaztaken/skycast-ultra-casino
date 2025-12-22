@@ -4,6 +4,7 @@ export interface UserProfile {
   uid: string;
   fullName: string;
   username: string;
+  password?: string;
   balance: number;
   joinedDate: string;
 }
@@ -21,6 +22,7 @@ export interface GameState {
   history: Array<string>;
 }
 
+// Added to support weather monitoring functionality
 export interface WeatherData {
   city: string;
   temp: number;

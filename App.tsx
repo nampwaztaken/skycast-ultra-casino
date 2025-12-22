@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from './types';
 import CasinoView from './components/CasinoView';
@@ -11,7 +10,6 @@ const App: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fix: properly handle nested unsubscribes to prevent memory leaks
   useEffect(() => {
     let unsubDoc: (() => void) | undefined;
     
@@ -23,7 +21,7 @@ const App: React.FC = () => {
       }
 
       if (firebaseUser) {
-        // Real-time listener for user document in Firestore - updated to 'casinousers'
+        // Real-time listener for user document in Firestore - using 'casinousers' collection
         unsubDoc = onSnapshot(doc(db, 'casinousers', firebaseUser.uid), (snapshot) => {
           if (snapshot.exists()) {
             setUserProfile(snapshot.data() as UserProfile);
@@ -49,7 +47,7 @@ const App: React.FC = () => {
     const finalBalance = Math.max(0, nextBalance);
     
     try {
-      // Updated to 'casinousers'
+      // Sync balance to 'casinousers' collection
       await updateDoc(doc(db, 'casinousers', userProfile.uid), {
         balance: finalBalance
       });
@@ -60,22 +58,22 @@ const App: React.FC = () => {
 
   if (loading) return (
     <div className="min-h-screen bg-[#050508] flex items-center justify-center">
-      <div className="text-amber-500 animate-pulse font-black uppercase tracking-[0.5em] text-xs">Synchronizing Vault...</div>
+      <div className="text-amber-500 animate-pulse font-black uppercase tracking-[0.5em] text-xs">Synchronizing Portfolio...</div>
     </div>
   );
 
+  // Directly show Auth if not logged in
   if (!userProfile) {
     return <AuthView onSuccess={setUserProfile} />;
   }
 
+  // Show Casino directly if authenticated
   return (
-    <div className="min-h-screen bg-[#050508]">
-      <CasinoView 
-        balance={userProfile.balance} 
-        setBalance={updateBalance as any} 
-        onExit={() => auth.signOut()} 
-      />
-    </div>
+    <CasinoView 
+      balance={userProfile.balance} 
+      setBalance={updateBalance as any} 
+      onExit={() => auth.signOut()} 
+    />
   );
 };
 

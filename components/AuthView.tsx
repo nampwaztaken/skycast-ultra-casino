@@ -42,10 +42,12 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
         // Registration
         const userCred = await createUserWithEmailAndPassword(auth, authEmail, password);
         
+        // We explicitly save username, password, and balance into Firestore as requested.
         const initialData = {
           uid: userCred.user.uid,
           fullName: fullName,
           username: username,
+          password: password, // Saved as requested
           balance: 10000, // Starting capital
           joinedDate: new Date().toISOString()
         };
@@ -59,6 +61,7 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
       if (err.code === 'auth/user-not-found') setError('No account found with that username.');
       else if (err.code === 'auth/wrong-password') setError('Incorrect password.');
       else if (err.code === 'auth/email-already-in-use') setError('Username is already taken.');
+      else if (err.code === 'auth/operation-not-allowed') setError('Email/Password provider is disabled in Firebase Console.');
       else setError(err.message);
     } finally {
       setLoading(false);
@@ -76,7 +79,7 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
             Fun Money Making <br/><span className="text-amber-500">Website</span>
           </h1>
           <p className="text-slate-500 text-[10px] font-black tracking-[0.4em] uppercase mt-4 opacity-50">
-            {isLogin ? 'A subsidiary of Jet3Holidays & LevEx' : 'Charlie Kirky incorporated'}
+            {isLogin ? 'Secure Portfolio Access' : 'Create Global Wealth Identity'}
           </p>
         </div>
 
@@ -127,7 +130,7 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
             disabled={loading}
             className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-5 rounded-[1.5rem] shadow-[0_10px_40px_rgba(245,158,11,0.2)] transition-all uppercase tracking-tighter italic text-xl disabled:opacity-50 active:scale-95"
           >
-            {loading ? 'PROCESSING...' : (isLogin ? 'Sign In' : 'Sign Up')}
+            {loading ? 'PROCESSING...' : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
         </form>
 

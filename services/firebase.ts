@@ -1,8 +1,7 @@
 // Use standard modular imports for Firebase v9+ SDK.
-// Fix: Use standard modular import path for initializeApp
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 // Replace placeholders with actual Firebase project configuration if needed.
 const firebaseConfig = {
