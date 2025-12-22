@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { UserProfile, SystemConfig } from './types';
 import CasinoView from './components/CasinoView';
 import AuthView from './components/AuthView';
@@ -156,6 +157,7 @@ const App: React.FC = () => {
         setBalance={updateBalance as any} 
         onExit={() => auth.signOut()} 
       />
+      <Analytics />
     </>
   );
 };
