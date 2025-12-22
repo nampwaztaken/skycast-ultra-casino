@@ -56,10 +56,10 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   const [dealerHand, setDealerHand] = useState<Card[]>([]);
   const [gameState, setGameState] = useState<'IDLE' | 'PLAYING' | 'DEALER_TURN' | 'ENDED'>('IDLE');
   const [message, setMessage] = useState('');
-  const [bet, setBet] = useState(100);
+  const [bet, setBet] = useState<number>(100);
 
   const startNewGame = async () => {
-    if (balance < bet) return;
+    if (balance < bet || bet <= 0) return;
     setBalance(prev => prev - bet);
     const newDeck = createDeck();
     setPlayerHand([]);
@@ -161,8 +161,11 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
               <label className="text-[8px] sm:text-[10px] font-black uppercase text-blue-400 mb-1 px-2">Bet Size</label>
               <input 
                 type="number" 
-                value={bet} 
-                onChange={e => setBet(Math.max(1, parseInt(e.target.value) || 0))}
+                value={bet === 0 ? '' : bet} 
+                onChange={e => {
+                  const val = parseInt(e.target.value);
+                  setBet(isNaN(val) ? 0 : val);
+                }}
                 className="w-full bg-black/60 border border-blue-500/30 rounded-xl sm:rounded-2xl py-3 sm:py-5 px-4 sm:px-6 text-lg sm:text-xl font-black text-blue-400 outline-none"
               />
             </div>

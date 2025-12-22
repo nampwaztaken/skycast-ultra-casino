@@ -3,6 +3,7 @@ import MinesGame from './MinesGame';
 import PlinkoGame from './PlinkoGame';
 import BlackjackGame from './BlackjackGame';
 import PokerGame from './PokerGame';
+import SlotMachine from './SlotMachine';
 import { CasinoGame } from '../types';
 import { getCasinoFortune } from '../services/gemini';
 import { auth } from '../services/firebase';
@@ -15,7 +16,7 @@ interface Props {
 
 const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
   const [fortune, setFortune] = useState("Synchronizing with wealth protocols...");
-  const [activeGame, setActiveGame] = useState<CasinoGame>('LOBBY');
+  const [activeGame, setActiveGame] = useState<CasinoGame | 'SLOTS'>('LOBBY');
   const user = auth.currentUser;
 
   const updateFortune = async (winAmount: number = 0) => {
@@ -32,6 +33,7 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
     { id: 'MINES', name: 'MINES', desc: 'Strategic high-risk asset recovery ops', icon: '💣', color: 'from-emerald-600 to-emerald-950', seed: 'wealth-mine' },
     { id: 'BLACKJACK', name: 'BLACKJACK', desc: 'Precision decision card-based arbitration', icon: '♠️', color: 'from-slate-700 to-slate-950', seed: 'wealth-21' },
     { id: 'POKER', name: 'POKER', desc: 'Ultimate deck verification and strategy', icon: '🃏', color: 'from-rose-600 to-rose-950', seed: 'wealth-holdem' },
+    { id: 'SLOTS', name: 'SLOTS', desc: 'High-speed algorithmic reel analysis', icon: '🎰', color: 'from-purple-600 to-indigo-900', seed: 'wealth-slots' },
   ] as const;
 
   const renderGame = () => {
@@ -40,6 +42,7 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
       case 'PLINKO': return <PlinkoGame balance={balance} setBalance={setBalance} onWin={updateFortune} />;
       case 'BLACKJACK': return <BlackjackGame balance={balance} setBalance={setBalance} onWin={updateFortune} />;
       case 'POKER': return <PokerGame balance={balance} setBalance={setBalance} onWin={updateFortune} />;
+      case 'SLOTS': return <SlotMachine balance={balance} setBalance={setBalance} onWin={updateFortune} />;
       default: return null;
     }
   };
@@ -52,8 +55,8 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg rotate-45 flex items-center justify-center shadow-[0_0_15px_rgba(251,191,36,0.3)]">
             <span className="text-black font-black -rotate-45 text-xs sm:text-base">$</span>
           </div>
-          <span className="text-lg sm:text-2xl font-black tracking-tighter text-white">
-            FUN MONEY <span className="hidden sm:inline text-amber-500 italic">WEBSITE</span>
+          <span className="text-lg sm:text-2xl font-black tracking-tighter text-white uppercase italic">
+            LEVICAN <span className="text-amber-500">EXPRESS</span>
           </span>
         </div>
         
@@ -64,7 +67,7 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
           </div>
           
           <div className="bg-white/5 border border-white/10 px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center space-x-2 sm:space-x-4 shadow-2xl">
-            <span className="text-amber-500 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em]">Money</span>
+            <span className="text-amber-500 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em]">Vault</span>
             <span className="text-white font-black tabular-nums tracking-tight text-sm sm:text-xl">Ł{balance.toLocaleString()}</span>
           </div>
           
@@ -94,7 +97,7 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
             {games.map((game) => (
               <div 
                 key={game.id}
-                onClick={() => setActiveGame(game.id as CasinoGame)}
+                onClick={() => setActiveGame(game.id as any)}
                 className={`group relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden cursor-pointer border border-white/5 transition-all hover:scale-[1.02] active:scale-95`}
               >
                 <img src={`https://picsum.photos/seed/${game.seed}/800/1200`} className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-700" alt={game.name} />
@@ -113,7 +116,7 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
               onClick={() => setActiveGame('LOBBY')}
               className="mb-6 sm:mb-12 flex items-center space-x-2 sm:space-x-4 text-slate-500 hover:text-white transition-all font-black uppercase text-[8px] sm:text-[10px] tracking-[0.3em] bg-white/5 px-4 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-[1.5rem] border border-white/5 group shadow-xl"
             >
-              <span className="text-amber-500 group-hover:-translate-x-2 transition-transform">←</span> <span>Exit to Dashboard</span>
+              <span className="text-amber-500 group-hover:-translate-x-2 transition-transform">←</span> <span>Exit to Terminal</span>
             </button>
             <div className="flex justify-center w-full">
               {renderGame()}
@@ -124,9 +127,7 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
 
       <div className="fixed bottom-0 w-full bg-black/90 backdrop-blur-3xl border-t border-white/5 py-3 sm:py-5 overflow-hidden z-40">
         <div className="flex animate-[marquee_50s_linear_infinite] whitespace-nowrap space-x-12 sm:space-x-24 text-[8px] sm:text-[9px] font-black text-slate-600 uppercase tracking-[0.4em]">
-          <span className="flex items-center"><span className="w-1.5 h-1.5 sm:w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>PORTFOLIO_777 SECURED 85,000 ON GRAVITY WEALTH</span>
-          <span className="flex items-center"><span className="w-1.5 h-1.5 sm:w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>ALL TRANSACTION ARBITRATION RESOLVED IN REAL-TIME</span>
-          <span className="flex items-center"><span className="w-1.5 h-1.5 sm:w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>LIQUIDITY INJECTION DETECTED IN ELITE SUITE</span>
+          <span className="flex items-center"><span className="w-1.5 h-1.5 sm:w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>TRANSACTION ARBITRATION RESOLVED IN REAL-TIME</span>
           <span className="flex items-center"><span className="w-1.5 h-1.5 sm:w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>WEBSITE OPERATING AT PEAK EFFICIENCY</span>
         </div>
       </div>

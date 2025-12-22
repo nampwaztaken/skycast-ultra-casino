@@ -26,10 +26,10 @@ const PokerGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   const [holds, setHolds] = useState<boolean[]>([false, false, false, false, false]);
   const [gameState, setGameState] = useState<'IDLE' | 'DEALT' | 'RESULT'>('IDLE');
   const [result, setResult] = useState('');
-  const [bet, setBet] = useState(25);
+  const [bet, setBet] = useState<number>(25);
 
   const deal = () => {
-    if (balance < bet) return;
+    if (balance < bet || bet <= 0) return;
     setBalance(prev => prev - bet);
     const newDeck = createDeck();
     const newHand = [newDeck.pop()!, newDeck.pop()!, newDeck.pop()!, newDeck.pop()!, newDeck.pop()!];
@@ -101,8 +101,11 @@ const PokerGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
         <div className="flex flex-col items-end">
           <input 
             type="number" 
-            value={bet} 
-            onChange={e => setBet(Math.max(1, parseInt(e.target.value) || 0))}
+            value={bet === 0 ? '' : bet} 
+            onChange={e => {
+              const val = parseInt(e.target.value);
+              setBet(isNaN(val) ? 0 : val);
+            }}
             disabled={gameState === 'DEALT'}
             className="w-20 sm:w-24 bg-black/40 border border-red-500/20 rounded-xl px-2 py-1.5 sm:px-3 sm:py-2 text-base sm:text-lg text-red-400 font-black outline-none"
           />

@@ -7,7 +7,7 @@ interface Props {
 }
 
 const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
-  const [bet, setBet] = useState(25);
+  const [bet, setBet] = useState<number>(25);
   const [mineCount, setMineCount] = useState(3);
   const [grid, setGrid] = useState<('hidden' | 'diamond' | 'bomb')[]>(Array(25).fill('hidden'));
   const [mines, setMines] = useState<number[]>([]);
@@ -23,7 +23,7 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   };
 
   const startGame = () => {
-    if (balance < bet) return;
+    if (balance < bet || bet <= 0) return;
     setBalance(prev => prev - bet);
     const newMines: number[] = [];
     while (newMines.length < mineCount) {
@@ -71,8 +71,11 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
             <label className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-green-500/60 mb-1 block">Bet</label>
             <input 
               type="number" 
-              value={bet} 
-              onChange={e => setBet(Math.max(1, parseInt(e.target.value) || 0))} 
+              value={bet === 0 ? '' : bet} 
+              onChange={e => {
+                const val = parseInt(e.target.value);
+                setBet(isNaN(val) ? 0 : val);
+              }} 
               disabled={gameState === 'PLAYING'} 
               className="w-full bg-transparent text-lg font-black text-white outline-none"
             />

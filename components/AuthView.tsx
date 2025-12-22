@@ -19,7 +19,7 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
   const [loading, setLoading] = useState(false);
 
   // Helper to treat username as email for Firebase Auth
-  const getEmailFromUsername = (uname: string) => `${uname.toLowerCase().trim()}@funmoney.com`;
+  const getEmailFromUsername = (uname: string) => `${uname.toLowerCase().trim()}@levican.express`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +35,16 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
         if (userDoc.exists()) {
           onSuccess(userDoc.data());
         } else {
-          setError("User record not found in database.");
+          setError("User record not found.");
         }
       } else {
         const userCred = await createUserWithEmailAndPassword(auth, authEmail, password);
         const initialData = {
           uid: userCred.user.uid,
           fullName: fullName,
-          username: username,
+          username: username.trim(),
           password: password,
-          balance: 10000,
+          balance: 1000,
           joinedDate: new Date().toISOString()
         };
         await setDoc(doc(db, 'casinousers', userCred.user.uid), initialData);
@@ -52,8 +52,8 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
       }
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/user-not-found') setError('No account found.');
-      else if (err.code === 'auth/wrong-password') setError('Incorrect password.');
+      if (err.code === 'auth/user-not-found') setError('Account not found.');
+      else if (err.code === 'auth/wrong-password') setError('Invalid password.');
       else if (err.code === 'auth/email-already-in-use') setError('Username taken.');
       else setError(err.message);
     } finally {
@@ -63,20 +63,22 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#050508] p-4 sm:p-6 selection:bg-amber-500/30 overflow-x-hidden">
-      <div className="w-full max-w-md bg-white/[0.02] border border-white/10 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3.5rem] backdrop-blur-3xl shadow-2xl">
-        <div className="text-center mb-6 sm:mb-10">
+      <div className="w-full max-w-md bg-white/[0.02] border border-white/10 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3.5rem] backdrop-blur-3xl shadow-2xl relative">
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/10 blur-[100px] rounded-full"></div>
+        
+        <div className="text-center mb-6 sm:mb-10 relative z-10">
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl rotate-12 flex items-center justify-center mx-auto mb-6 sm:mb-8 shadow-[0_0_30px_rgba(251,191,36,0.2)]">
-            <span className="text-black font-black text-3xl sm:text-4xl -rotate-12">📈</span>
+            <span className="text-black font-black text-3xl sm:text-4xl -rotate-12">🏦</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-white uppercase italic leading-none">
-            Fun Money Making <br/><span className="text-amber-500">Website</span>
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tighter text-white uppercase italic leading-none">
+            LEVICAN <span className="text-amber-500">EXPRESS</span>
           </h1>
-          <p className="text-slate-500 text-[8px] sm:text-[10px] font-black tracking-[0.4em] uppercase mt-4 opacity-50">
-            {isLogin ? 'Secure Portfolio Access' : 'Create Wealth Identity'}
+          <p className="text-slate-500 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] mt-4 opacity-50">
+            {isLogin ? 'LOGIN' : 'SIGN UP'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
           {!isLogin && (
             <input 
               type="text" 
@@ -117,19 +119,18 @@ const AuthView: React.FC<Props> = ({ onSuccess }) => {
             disabled={loading}
             className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-4 sm:py-5 rounded-2xl shadow-lg transition-all uppercase tracking-tighter italic text-lg sm:text-xl disabled:opacity-50 active:scale-95"
           >
-            {loading ? '...' : (isLogin ? 'Sign In' : 'Create Account')}
+            {loading ? '...' : (isLogin ? 'LOGIN' : 'SIGN UP')}
           </button>
         </form>
 
-        <div className="mt-8 sm:mt-10 flex flex-col items-center space-y-4 sm:space-y-6">
-          <div className="h-px w-16 bg-white/5"></div>
+        <div className="mt-8 sm:mt-10 flex flex-col items-center space-y-4 relative z-10">
           <p className="text-center text-slate-500 text-[9px] font-black uppercase tracking-widest">
-            {isLogin ? "No Access ID?" : "Already Registered?"}
+            {isLogin ? "No account?" : "Already have an account?"}
             <button 
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
               className="text-amber-500 ml-2 hover:text-amber-300 transition-colors"
             >
-              {isLogin ? 'Register Here' : 'Return to Login'}
+              {isLogin ? 'Create one' : 'Login'}
             </button>
           </p>
         </div>
