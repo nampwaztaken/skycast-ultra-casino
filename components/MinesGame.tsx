@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface Props {
@@ -56,7 +55,6 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   const cashOut = () => {
     if (gameState !== 'PLAYING') return;
     const win = Math.floor(bet * currentMultiplier);
-    // Functional update for atomic safety
     setBalance(prev => prev + win);
     onWin(win);
     setGameState('CASHED_OUT');
@@ -66,57 +64,59 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
   };
 
   return (
-    <div className="bg-[#0a0a10] border-2 border-green-500/20 rounded-[4rem] p-8 md:p-12 w-full max-w-4xl flex flex-col md:flex-row gap-8 md:gap-12 shadow-2xl relative overflow-hidden">
-      <div className="w-full md:w-64 flex flex-col space-y-6 shrink-0">
-        <div className="bg-black/40 p-5 rounded-2xl border border-white/5">
-          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-green-500/60 mb-2 block">Amount to Bet</label>
-          <input 
-            type="number" 
-            value={bet} 
-            onChange={e => setBet(Math.max(1, parseInt(e.target.value) || 0))} 
-            disabled={gameState === 'PLAYING'} 
-            className="w-full bg-transparent text-xl font-black text-white outline-none"
-          />
+    <div className="bg-[#0a0a10] border border-green-500/10 rounded-[2rem] sm:rounded-[4rem] p-4 sm:p-10 w-full max-w-4xl flex flex-col md:flex-row gap-6 md:gap-12 shadow-2xl relative overflow-hidden">
+      <div className="w-full md:w-64 flex flex-col space-y-4 sm:space-y-6 shrink-0 order-2 md:order-1">
+        <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+          <div className="bg-black/40 p-4 rounded-xl border border-white/5">
+            <label className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-green-500/60 mb-1 block">Bet</label>
+            <input 
+              type="number" 
+              value={bet} 
+              onChange={e => setBet(Math.max(1, parseInt(e.target.value) || 0))} 
+              disabled={gameState === 'PLAYING'} 
+              className="w-full bg-transparent text-lg font-black text-white outline-none"
+            />
+          </div>
+
+          <div className="bg-black/40 p-4 rounded-xl border border-white/5">
+            <label className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-green-500/60 mb-1 block">Mines: {mineCount}</label>
+            <input 
+              type="range" min="1" max="24" value={mineCount} 
+              onChange={e => setMineCount(parseInt(e.target.value))} 
+              disabled={gameState === 'PLAYING'} 
+              className="w-full accent-green-500 h-6" 
+            />
+          </div>
         </div>
 
-        <div className="bg-black/40 p-5 rounded-2xl border border-white/5">
-          <label className="text-[10px] font-black uppercase tracking-[0.3em] text-green-500/60 mb-2 block">Mines: {mineCount}</label>
-          <input 
-            type="range" min="1" max="24" value={mineCount} 
-            onChange={e => setMineCount(parseInt(e.target.value))} 
-            disabled={gameState === 'PLAYING'} 
-            className="w-full accent-green-500" 
-          />
-        </div>
-
-        <div className="bg-black/60 p-6 rounded-3xl border border-white/5 text-center shadow-inner">
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Potential Win</p>
-          <p className="text-4xl font-black text-green-400 italic">{(bet * currentMultiplier).toFixed(0)}</p>
-          <p className="text-[9px] text-white/20 mt-1 uppercase">{currentMultiplier.toFixed(2)}x</p>
+        <div className="bg-black/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/5 text-center shadow-inner">
+          <p className="text-[8px] sm:text-[10px] font-black text-gray-500 uppercase tracking-widest">Potential Return</p>
+          <p className="text-2xl sm:text-4xl font-black text-green-400 italic">Ł{(bet * currentMultiplier).toFixed(0)}</p>
+          <p className="text-[8px] text-white/20 mt-1 uppercase tracking-tighter">{currentMultiplier.toFixed(3)}x yield</p>
         </div>
 
         <button 
           onClick={gameState === 'PLAYING' ? cashOut : startGame}
-          className={`w-full py-6 rounded-3xl font-black text-2xl uppercase italic tracking-tighter transition-all active:scale-95 shadow-lg
-            ${gameState === 'PLAYING' ? 'bg-green-600 hover:bg-green-500 text-white shadow-green-900/40' : 'bg-white text-black hover:bg-green-400'}
+          className={`w-full py-4 sm:py-6 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl uppercase italic tracking-tighter transition-all active:scale-95 shadow-lg
+            ${gameState === 'PLAYING' ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-white text-black hover:bg-green-400'}
           `}
         >
-          {gameState === 'PLAYING' ? 'CASH OUT' : 'START GAME'}
+          {gameState === 'PLAYING' ? 'CASH OUT' : 'START'}
         </button>
       </div>
 
-      <div className="flex-1 bg-black/30 p-4 rounded-[2.5rem] shadow-inner border border-white/5 flex items-start">
-        <div className="grid grid-cols-5 gap-2 w-full">
+      <div className="flex-1 bg-black/30 p-2 sm:p-4 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-inner border border-white/5 order-1 md:order-2">
+        <div className="grid grid-cols-5 gap-1 sm:gap-2 w-full max-w-[500px] mx-auto">
           {grid.map((cell, i) => (
             <button
               key={i}
               onClick={() => revealCell(i)}
               disabled={gameState !== 'PLAYING' && cell === 'hidden'}
               className={`
-                aspect-square w-full rounded-xl flex items-center justify-center text-2xl md:text-3xl transition-colors duration-200
-                ${cell === 'hidden' ? 'bg-[#1a1a25] hover:bg-[#252535] border border-white/5 shadow-md active:bg-[#303040]' : 'cursor-default'}
+                aspect-square w-full rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-3xl transition-all
+                ${cell === 'hidden' ? 'bg-[#1a1a25] hover:bg-[#252535] border border-white/5 active:scale-90' : 'cursor-default'}
                 ${cell === 'diamond' ? 'bg-green-500/20 border border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : ''}
-                ${cell === 'bomb' ? 'bg-red-500/30 border border-red-500/40' : ''}
+                ${cell === 'bomb' ? 'bg-red-500/30 border border-red-500/40 scale-105' : ''}
               `}
             >
               {cell === 'diamond' ? '💎' : cell === 'bomb' ? '💣' : ''}

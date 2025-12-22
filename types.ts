@@ -22,12 +22,12 @@ export interface GameState {
   history: Array<string>;
 }
 
-// Added to support weather monitoring functionality
+// Added WeatherData interface to fix missing member error
 export interface WeatherData {
   city: string;
   temp: number;
   condition: string;
   humidity: string;
   windSpeed: string;
-  sources?: { uri: string; title: string }[];
+  sources?: Array<{uri: string, title?: string}>;
 }
