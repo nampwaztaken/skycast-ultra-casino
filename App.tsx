@@ -1,68 +1,79 @@
 
 import React, { useState, useEffect } from 'react';
-import { AppMode, User } from './types';
-import WeatherView from './components/WeatherView';
+import { UserProfile } from './types';
 import CasinoView from './components/CasinoView';
-
-const SECRET_CODE = "777-JACKPOT";
+import AuthView from './components/AuthView';
+import { auth, db } from './services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 const App: React.FC = () => {
-  const [mode, setMode] = useState<AppMode>(AppMode.WEATHER);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const [user, setUser] = useState<User>(() => {
-    const saved = localStorage.getItem('skycast_user');
-    return saved ? JSON.parse(saved) : {
-      username: "Guest",
-      balance: 1000,
-      isLoggedIn: false,
-      joinedDate: new Date().toLocaleDateString()
-    };
-  });
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Fix: properly handle nested unsubscribes to prevent memory leaks
   useEffect(() => {
-    localStorage.setItem('skycast_user', JSON.stringify(user));
-  }, [user]);
+    let unsubDoc: (() => void) | undefined;
+    
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      // Clear any existing doc listener when auth state changes
+      if (unsubDoc) {
+        unsubDoc();
+        unsubDoc = undefined;
+      }
 
-  const setBalance = (updater: number | ((prev: number) => number)) => {
-    setUser(prev => {
-      const nextBalance = typeof updater === 'function' ? updater(prev.balance) : updater;
-      return { ...prev, balance: Math.max(0, nextBalance) };
+      if (firebaseUser) {
+        // Real-time listener for user document in Firestore
+        unsubDoc = onSnapshot(doc(db, 'users', firebaseUser.uid), (snapshot) => {
+          if (snapshot.exists()) {
+            setUserProfile(snapshot.data() as UserProfile);
+          }
+          setLoading(false);
+        });
+      } else {
+        setUserProfile(null);
+        setLoading(false);
+      }
     });
-  };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.toUpperCase() === SECRET_CODE) {
-      setMode(AppMode.CASINO);
-      setSearchQuery("");
+    return () => {
+      unsubscribeAuth();
+      if (unsubDoc) unsubDoc();
+    };
+  }, []);
+
+  const updateBalance = async (updater: number | ((prev: number) => number)) => {
+    if (!userProfile) return;
+    
+    const nextBalance = typeof updater === 'function' ? updater(userProfile.balance) : updater;
+    const finalBalance = Math.max(0, nextBalance);
+    
+    try {
+      await updateDoc(doc(db, 'users', userProfile.uid), {
+        balance: finalBalance
+      });
+    } catch (err) {
+      console.error("Failed to sync balance to Firestore:", err);
     }
   };
 
-  const handleLogin = (username: string) => {
-    setUser(prev => ({ ...prev, username, isLoggedIn: true }));
-  };
+  if (loading) return (
+    <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+      <div className="text-amber-500 animate-pulse font-black uppercase tracking-[0.5em] text-xs">Synchronizing Vault...</div>
+    </div>
+  );
 
-  const handleExitCasino = () => {
-    setMode(AppMode.WEATHER);
-  };
+  if (!userProfile) {
+    return <AuthView onSuccess={setUserProfile} />;
+  }
 
   return (
-    <div className="min-h-screen">
-      {mode === AppMode.WEATHER ? (
-        <WeatherView 
-          user={user}
-          onLogin={handleLogin}
-          searchQuery={searchQuery} 
-          onSearchChange={handleSearch} 
-        />
-      ) : (
-        <CasinoView 
-          balance={user.balance} 
-          setBalance={setBalance} 
-          onExit={handleExitCasino} 
-        />
-      )}
+    <div className="min-h-screen bg-[#050508]">
+      <CasinoView 
+        balance={userProfile.balance} 
+        setBalance={updateBalance as any} 
+        onExit={() => auth.signOut()} 
+      />
     </div>
   );
 };

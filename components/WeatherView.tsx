@@ -124,6 +124,26 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
                 </div>
               </div>
 
+              {/* Display Search Grounding Sources as required by Gemini API guidelines */}
+              {weather.sources && weather.sources.length > 0 && (
+                <div className="mb-8 px-2">
+                  <p className="text-[8px] font-black opacity-20 uppercase tracking-[0.4em] mb-2">Grounding Sources</p>
+                  <div className="flex flex-wrap gap-2">
+                    {weather.sources.map((src, i) => (
+                      <a 
+                        key={i} 
+                        href={src.uri} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-[9px] text-blue-400/70 hover:text-blue-300 transition-colors border border-blue-400/10 bg-blue-400/5 px-3 py-1 rounded-full truncate max-w-full"
+                      >
+                        {src.title || "Ref"}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-blue-500/5 p-6 rounded-[2.5rem] border border-blue-400/10 relative overflow-hidden group">
                 <div className="absolute -right-2 -top-2 p-4 opacity-5 text-4xl group-hover:opacity-10 transition-opacity">🤖</div>
                 <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3">Orbital Insight</h3>

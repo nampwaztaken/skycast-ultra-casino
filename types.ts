@@ -1,10 +1,12 @@
-
-export enum AppMode {
-  WEATHER = 'WEATHER',
-  CASINO = 'CASINO'
-}
-
 export type CasinoGame = 'LOBBY' | 'MINES' | 'PLINKO' | 'BLACKJACK' | 'POKER';
+
+export interface UserProfile {
+  uid: string;
+  fullName: string;
+  username: string;
+  balance: number;
+  joinedDate: string;
+}
 
 export interface User {
   username: string;
@@ -13,17 +15,17 @@ export interface User {
   joinedDate: string;
 }
 
+export interface GameState {
+  balance: number;
+  lastWin: number;
+  history: Array<string>;
+}
+
 export interface WeatherData {
   city: string;
   temp: number;
   condition: string;
   humidity: string;
   windSpeed: string;
-  description: string;
-}
-
-export interface GameState {
-  balance: number;
-  lastWin: number;
-  history: Array<string>;
+  sources?: { uri: string; title: string }[];
 }

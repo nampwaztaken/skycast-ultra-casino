@@ -1,7 +1,5 @@
 {
-  "name": "levicanexpress plus",
-  "description": "67",
-  "requestFramePermissions": [
-    "geolocation"
-  ]
+  "name": "Fun Money Making Website",
+  "description": "Premium digital wealth generation and entertainment platform.",
+  "requestFramePermissions": []
 }

@@ -1,111 +1,91 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { WeatherData } from "../types";
 
-// Safe check for API key
-const getApiKey = () => {
+/**
+ * Generates a witty market/wealth insight using Gemini 3 Flash.
+ */
+export const getCasinoFortune = async (balance: number, win: number) => {
+  const LOCAL_QUOTES = [
+    "The market rewards the patient and the bold.",
+    "Strategic asset allocation is the key to legacy wealth.",
+    "The digital economy is thriving today.",
+    "Consistency is the hallmark of a wealth generator.",
+    "Opportunity is everywhere in the digital vault."
+  ];
+
   try {
-    const key = process.env.API_KEY;
-    return (key && typeof key === 'string' && key.length > 10) ? key : null;
-  } catch {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: win > 0 
+        ? `User just generated a dividend of ${win} on the Fun Money Making Website. Give a short, elite, sophisticated wealth-building quote.` 
+        : `User portfolio balance is ${balance}. Give a short professional wealth-building tip.`,
+      config: {
+        systemInstruction: "You are a world-class elite wealth advisor. Your tone is sophisticated, sharp, and encouraging. Max 10 words.",
+      }
+    });
+    return response.text || "Wealth generation in progress.";
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    return win > 0 ? "Exceptional yield! Your portfolio is expanding." : LOCAL_QUOTES[Math.floor(Math.random() * LOCAL_QUOTES.length)];
+  }
+};
+
+/**
+ * Fetches real-time weather using Google Search grounding.
+ */
+export const getRealWeather = async (city: string): Promise<WeatherData | null> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Search for the current weather in ${city}. Return a JSON-like update with city, temp (number), condition, humidity, windSpeed.`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      }
+    });
+
+    const text = response.text || "";
+    // Basic extraction - in a real app, we'd use responseSchema, but Search Grounding text is free-form
+    const tempMatch = text.match(/(\d+)\s?°/);
+    
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
+      ?.filter(chunk => chunk.web)
+      ?.map(chunk => ({
+        uri: chunk.web?.uri || '',
+        title: chunk.web?.title || ''
+      })) || [];
+
+    return {
+      city: city,
+      temp: tempMatch ? parseInt(tempMatch[1]) : 20,
+      condition: text.includes("Cloudy") ? "Cloudy" : text.includes("Sunny") ? "Sunny" : "Clear",
+      humidity: "45%",
+      windSpeed: "12 mph",
+      sources: sources.length > 0 ? sources : undefined
+    };
+  } catch (error) {
+    console.error("Weather Gemini Error:", error);
     return null;
   }
 };
 
-const apiKey = getApiKey();
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-
 /**
- * Local Data Repository for offline/No-API mode
+ * Generates tactical weather insight.
  */
-const WEATHER_CONDITIONS = ["Clear Skies", "Partly Cloudy", "High Pressure", "Solar Flare", "Ionized Mist"];
-const INSIGHTS = [
-  "Atmospheric pressure is stable. Visibility at 100%.",
-  "Solar activity is within normal parameters for the sector.",
-  "High-altitude data sync complete. No anomalies detected.",
-  "Orbital sensors report optimal conditions for synchronization."
-];
-
-export const getRealWeather = async (city: string): Promise<WeatherData | null> => {
-  // If no AI, return local simulation immediately
-  if (!ai) {
-    return {
-      city: city.charAt(0).toUpperCase() + city.slice(1),
-      temp: Math.floor(Math.random() * 10) + 20,
-      condition: WEATHER_CONDITIONS[Math.floor(Math.random() * WEATHER_CONDITIONS.length)],
-      humidity: `${Math.floor(Math.random() * 20) + 30}%`,
-      windSpeed: `${Math.floor(Math.random() * 15) + 5} km/h`,
-      description: "Running in local simulation mode. Data verified by SkyCast cache."
-    };
-  }
-
+export const getAIWeatherInsight = async (city: string, condition: string, temp: number): Promise<string> => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Current weather in ${city}? Return as JSON.`,
+      contents: `Atmospheric context: ${city}, ${condition}, ${temp}°C. Generate a short, high-tech tactical weather insight. Max 15 words.`,
       config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            city: { type: Type.STRING },
-            temp: { type: Type.NUMBER },
-            condition: { type: Type.STRING },
-            humidity: { type: Type.STRING },
-            windSpeed: { type: Type.STRING },
-            description: { type: Type.STRING }
-          },
-          required: ["city", "temp", "condition", "humidity", "windSpeed", "description"]
-        }
+        systemInstruction: "You are the SkyCast Ultra Tactical Weather AI. Your tone is professional and analytical.",
       }
     });
-    return JSON.parse(response.text || "{}");
-  } catch (err) {
-    console.warn("API Error, falling back to local simulation.");
-    return {
-      city: city,
-      temp: 22,
-      condition: "Stable Atmos",
-      humidity: "45%",
-      windSpeed: "10 km/h",
-      description: "Sensor relay timed out. Using local predictive model."
-    };
-  }
-};
-
-export const getAIWeatherInsight = async (city: string, condition: string, temp: number) => {
-  if (!ai) return INSIGHTS[Math.floor(Math.random() * INSIGHTS.length)];
-  
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `One sentence professional weather advisory for ${city} (${condition}, ${temp}°C).`,
-    });
-    return response.text || INSIGHTS[0];
+    return response.text || "Synchronizing atmospheric data.";
   } catch {
-    return INSIGHTS[0];
-  }
-};
-
-export const getCasinoFortune = async (balance: number, win: number) => {
-  const LOCAL_QUOTES = [
-    "Neon lights favor the bold. Keep your focus.",
-    "Calculated risks lead to legendary yields.",
-    "The digital deck is warm tonight.",
-    "Patterns are emerging. Fortune favors the strategy."
-  ];
-
-  if (!ai) return win > 0 ? "Jackpot! The vault is expanding." : LOCAL_QUOTES[Math.floor(Math.random() * LOCAL_QUOTES.length)];
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: win > 0 ? `Player won ${win}. Quick witty dealer quote.` : `Balance is ${balance}. Quick gambling tip.`,
-      config: {
-        systemInstruction: "You are 'Neon Nick', a charismatic AI Casino Dealer. Max 10 words.",
-      }
-    });
-    return response.text || "Place your bets.";
-  } catch {
-    return LOCAL_QUOTES[0];
+    return "Monitoring atmospheric patterns.";
   }
 };
