@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface Props {
@@ -101,13 +102,17 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
       const dealerLogic = async () => {
         let h = [...dealerHand];
         let d = [...deck];
+
         while (calculateHand(h) < 17) {
-          h.push(d.pop()!);
+          // Pure fair draw logic
+          const card = d.pop()!;
+          h.push(card);
           setDealerHand([...h]);
           await new Promise(r => setTimeout(r, 800));
         }
-        const ds = calculateHand(h);
+        
         const ps = calculateHand(playerHand);
+        const ds = calculateHand(h);
         setGameState('ENDED');
         if (ds > 21 || ps > ds) {
           const win = ps === 21 && playerHand.length === 2 ? Math.floor(bet * 2.5) : bet * 2;
@@ -175,7 +180,7 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
               />
             </div>
             <button onClick={startNewGame} className="w-full md:flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl shadow-xl transition-all h-[68px] uppercase italic tracking-tighter text-2xl">
-              Initiate Deal
+              Start Deal
             </button>
           </div>
         ) : (

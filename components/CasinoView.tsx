@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MinesGame from './MinesGame';
 import PlinkoGame from './PlinkoGame';
@@ -57,11 +58,6 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
         </div>
         
         <div className="flex items-center space-x-8">
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Portfolio Holder</span>
-            <span className="text-xs font-bold text-white">{user?.displayName || "Elite User"}</span>
-          </div>
-          
           <div className="bg-white/5 border border-white/10 px-6 py-2.5 rounded-2xl flex items-center space-x-4 shadow-2xl">
             <span className="text-amber-500 text-[10px] font-black uppercase tracking-[0.2em]">Money</span>
             <span className="text-white font-black tabular-nums tracking-tight text-xl">Ł{balance.toLocaleString()}</span>
@@ -122,10 +118,10 @@ const CasinoView: React.FC<Props> = ({ balance, setBalance, onExit }) => {
 
       <div className="fixed bottom-0 w-full bg-black/90 backdrop-blur-3xl border-t border-white/5 py-5 overflow-hidden z-40">
         <div className="flex animate-[marquee_50s_linear_infinite] whitespace-nowrap space-x-24 text-[9px] font-black text-slate-600 uppercase tracking-[0.4em]">
-          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>YIELD: PORTFOLIO_777 SECURED 85,000 ON GRAVITY WEALTH</span>
-          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>COMPLIANCE: ALL TRANSACTION ARBITRATION RESOLVED IN REAL-TIME</span>
-          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>MARKET ALERT: LIQUIDITY INJECTION DETECTED IN ELITE 21 SUITE</span>
-          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_10px_#f59e0b]"></span>SUCCESS: FUN MONEY MAKING WEBSITE IS OPERATING AT PEAK EFFICIENCY</span>
+          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_100px_#f59e0b]"></span>YIELD: PORTFOLIO_777 SECURED 85,000 ON GRAVITY WEALTH</span>
+          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_100px_#f59e0b]"></span>COMPLIANCE: ALL TRANSACTION ARBITRATION RESOLVED IN REAL-TIME</span>
+          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_100px_#f59e0b]"></span>MARKET ALERT: LIQUIDITY INJECTION DETECTED IN ELITE 21 SUITE</span>
+          <span className="flex items-center"><span className="w-2 h-2 bg-amber-500 rounded-full mr-4 shadow-[0_0_100px_#f59e0b]"></span>SUCCESS: FUN MONEY MAKING WEBSITE IS OPERATING AT PEAK EFFICIENCY</span>
         </div>
       </div>
 

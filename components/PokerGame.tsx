@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 interface Props {
@@ -42,7 +43,9 @@ const PokerGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
 
   const draw = () => {
     const newDeck = [...deck];
-    const newHand = hand.map((card, i) => holds[i] ? card : newDeck.pop()!);
+    // Pure draw logic - no hand breaking swaps
+    let newHand = hand.map((card, i) => holds[i] ? card : newDeck.pop()!);
+    
     setHand(newHand);
     setGameState('RESULT');
     evaluateHand(newHand);

@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { getRealWeather, getAIWeatherInsight } from '../services/gemini';
 import { User, WeatherData } from '../types';
-import AdminTerminal from './AdminTerminal';
 
 interface Props {
   user: User;
@@ -19,18 +17,8 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
   const [showAccount, setShowAccount] = useState(false);
   const [tempName, setTempName] = useState("");
   const [logoClicks, setLogoClicks] = useState(0);
-  const [showAdminChallenge, setShowAdminChallenge] = useState(false);
-  const [adminPin, setAdminPin] = useState("");
-  const [showAdmin, setShowAdmin] = useState(false);
 
   const fetchWeather = async (city: string) => {
-    // Stage 1: Trapdoor Entry
-    if (city.toUpperCase() === 'ROOT_ACCESS') {
-      setShowAdminChallenge(true);
-      onSearchChange(""); // Clear search bar
-      return;
-    }
-
     setLoading(true);
     try {
       const data = await getRealWeather(city);
@@ -57,19 +45,6 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
     }
   };
 
-  const verifyAdmin = () => {
-    // Stage 2: Verification Key
-    if (adminPin === '7777') {
-      setShowAdmin(true);
-      setShowAdminChallenge(false);
-      setAdminPin("");
-    } else {
-      alert("INTEGRITY CHECK FAILED. SESSION LOGGED.");
-      setShowAdminChallenge(false);
-      setAdminPin("");
-    }
-  };
-
   const handleLogoClick = () => {
     const nextClicks = logoClicks + 1;
     if (nextClicks >= 5) {
@@ -77,17 +52,15 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
       setLogoClicks(0);
     } else {
       setLogoClicks(nextClicks);
+      // Reset clicks after 3 seconds of inactivity
       setTimeout(() => setLogoClicks(0), 3000);
     }
   };
 
-  if (showAdmin) {
-    return <AdminTerminal onClose={() => setShowAdmin(false)} />;
-  }
-
   return (
     <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#020617] min-h-screen flex flex-col items-center p-6 text-white font-sans">
       <div className="w-full max-w-md">
+        {/* Header */}
         <header className="flex justify-between items-center mb-10">
           <div onClick={() => setShowAccount(!showAccount)} className="flex items-center space-x-3 cursor-pointer group">
             <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-all">
@@ -104,35 +77,7 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
           </div>
         </header>
 
-        {showAdminChallenge && (
-          <div className="bg-slate-900 border border-blue-500/30 p-10 rounded-[3rem] mb-8 animate-in zoom-in-95 duration-300">
-            <h3 className="text-[10px] font-black uppercase tracking-widest mb-4 text-blue-400 text-center">Identity Verification Required</h3>
-            <p className="text-[10px] text-slate-500 mb-6 text-center uppercase tracking-widest leading-relaxed">Accessing Kernel-Level Weather Telemetry</p>
-            <input 
-              type="password" 
-              placeholder="ENTER AUTH KEY" 
-              value={adminPin}
-              onChange={e => setAdminPin(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 mb-4 outline-none focus:border-blue-500 text-center font-mono tracking-[1em]"
-            />
-            <div className="flex gap-4">
-               <button 
-                onClick={() => setShowAdminChallenge(false)}
-                className="flex-1 bg-white/5 text-[10px] font-black py-4 rounded-xl hover:bg-white/10 transition-all uppercase tracking-widest"
-              >
-                Abort
-              </button>
-              <button 
-                onClick={verifyAdmin}
-                className="flex-1 bg-blue-600 text-white text-[10px] font-black py-4 rounded-xl hover:bg-blue-500 transition-all uppercase tracking-widest shadow-lg shadow-blue-500/20"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showAccount && !user.isLoggedIn && !showAdminChallenge && (
+        {showAccount && !user.isLoggedIn && (
           <div className="bg-white/5 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/10 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
             <h3 className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-50">Cloud Account Sync</h3>
             <input 
@@ -151,58 +96,76 @@ const WeatherView: React.FC<Props> = ({ user, onLogin, searchQuery, onSearchChan
           </div>
         )}
 
-        {!showAdminChallenge && (
-          <div className="bg-white/[0.03] backdrop-blur-md rounded-[3rem] p-8 shadow-2xl border border-white/10 relative">
-            <form onSubmit={handleSearchSubmit} className="mb-10">
-              <div className="relative">
-                <input 
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Search global coordinates..."
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
-                />
-                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-100 transition-opacity">
-                  🔍
-                </button>
-              </div>
-            </form>
+        <div className="bg-white/[0.03] backdrop-blur-md rounded-[3rem] p-8 shadow-2xl border border-white/10 relative">
+          <form onSubmit={handleSearchSubmit} className="mb-10">
+            <div className="relative">
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Search global coordinates..."
+                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
+              />
+              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-100 transition-opacity">
+                🔍
+              </button>
+            </div>
+          </form>
 
-            {loading ? (
-              <div className="text-center py-24 animate-pulse">
-                <div className="text-5xl mb-6">📡</div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Polling Satellite Uplink...</p>
-              </div>
-            ) : weather && (
-              <div className="animate-in fade-in zoom-in-95 duration-500">
-                <div className="text-center mb-12">
-                  <p className="text-sm font-bold opacity-40 tracking-widest uppercase mb-1">{weather.city}</p>
-                  <div className="relative inline-block">
-                     <h2 className="text-9xl font-extralight tracking-tighter">{Math.round(weather.temp)}°</h2>
-                  </div>
-                  <p className="text-2xl font-black uppercase tracking-[0.2em] mt-2 text-blue-200">{weather.condition}</p>
+          {loading ? (
+            <div className="text-center py-24 animate-pulse">
+              <div className="text-5xl mb-6">📡</div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Polling Satellite Uplink...</p>
+            </div>
+          ) : weather && (
+            <div className="animate-in fade-in zoom-in-95 duration-500">
+              <div className="text-center mb-12">
+                <p className="text-sm font-bold opacity-40 tracking-widest uppercase mb-1">{weather.city}</p>
+                <div className="relative inline-block">
+                   <h2 className="text-9xl font-extralight tracking-tighter">{Math.round(weather.temp)}°</h2>
                 </div>
+                <p className="text-2xl font-black uppercase tracking-[0.2em] mt-2 text-blue-200">{weather.condition}</p>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-black/40 p-5 rounded-2rem border border-white/5 flex flex-col items-center">
-                    <span className="text-[9px] font-black opacity-30 uppercase tracking-widest mb-1">Humidity</span>
-                    <p className="text-xl font-bold">{weather.humidity}</p>
-                  </div>
-                  <div className="bg-black/40 p-5 rounded-2rem border border-white/5 flex flex-col items-center">
-                    <span className="text-[9px] font-black opacity-30 uppercase tracking-widest mb-1">Wind Velocity</span>
-                    <p className="text-xl font-bold">{weather.windSpeed}</p>
-                  </div>
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-black/40 p-5 rounded-[2rem] border border-white/5 flex flex-col items-center">
+                  <span className="text-[9px] font-black opacity-30 uppercase tracking-widest mb-1">Humidity</span>
+                  <p className="text-xl font-bold">{weather.humidity}</p>
                 </div>
-
-                <div className="bg-blue-500/5 p-6 rounded-[2.5rem] border border-blue-400/10 relative overflow-hidden group">
-                  <div className="absolute -right-2 -top-2 p-4 opacity-5 text-4xl group-hover:opacity-10 transition-opacity">🤖</div>
-                  <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3">Orbital Insight</h3>
-                  <p className="text-xs italic leading-relaxed text-blue-100/80">{insight}</p>
+                <div className="bg-black/40 p-5 rounded-[2rem] border border-white/5 flex flex-col items-center">
+                  <span className="text-[9px] font-black opacity-30 uppercase tracking-widest mb-1">Wind Velocity</span>
+                  <p className="text-xl font-bold">{weather.windSpeed}</p>
                 </div>
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Display Search Grounding Sources as required by Gemini API guidelines */}
+              {weather.sources && weather.sources.length > 0 && (
+                <div className="mb-8 px-2">
+                  <p className="text-[8px] font-black opacity-20 uppercase tracking-[0.4em] mb-2">Grounding Sources</p>
+                  <div className="flex flex-wrap gap-2">
+                    {weather.sources.map((src, i) => (
+                      <a 
+                        key={i} 
+                        href={src.uri} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-[9px] text-blue-400/70 hover:text-blue-300 transition-colors border border-blue-400/10 bg-blue-400/5 px-3 py-1 rounded-full truncate max-w-full"
+                      >
+                        {src.title || "Ref"}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-blue-500/5 p-6 rounded-[2.5rem] border border-blue-400/10 relative overflow-hidden group">
+                <div className="absolute -right-2 -top-2 p-4 opacity-5 text-4xl group-hover:opacity-10 transition-opacity">🤖</div>
+                <h3 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3">Orbital Insight</h3>
+                <p className="text-xs italic leading-relaxed text-blue-100/80">{insight}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="mt-12 flex flex-col items-center space-y-2">

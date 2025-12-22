@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 interface Props {
@@ -19,7 +20,8 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
     for (let i = 0; i < diamonds; i++) {
       mult *= (25 - i) / (25 - mineCount - i);
     }
-    return mult * 0.97;
+    // Pure mathematical multiplier
+    return mult;
   };
 
   const startGame = () => {
@@ -38,6 +40,8 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
 
   const revealCell = (index: number) => {
     if (gameState !== 'PLAYING' || grid[index] !== 'hidden') return;
+    
+    // No force bomb logic - purely based on pre-set mine positions
     if (mines.includes(index)) {
       const newGrid = [...grid];
       mines.forEach(m => newGrid[m] = 'bomb');
@@ -47,8 +51,8 @@ const MinesGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
       const newGrid = [...grid];
       newGrid[index] = 'diamond';
       setGrid(newGrid);
-      const diamondsFound = newGrid.filter(c => c === 'diamond').length;
-      setCurrentMultiplier(calculateMultiplier(diamondsFound));
+      const newDiamondsCount = newGrid.filter(c => c === 'diamond').length;
+      setCurrentMultiplier(calculateMultiplier(newDiamondsCount));
     }
   };
 

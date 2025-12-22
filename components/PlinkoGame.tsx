@@ -9,11 +9,11 @@ interface Props {
 
 const RISK_LEVELS = ['Low', 'Medium', 'High'] as const;
 
-// Punitive multipliers: Center zones are massive losses across all risk levels.
+// Professionalized multipliers with a standard distribution
 const MULTIPLIERS_16: Record<string, number[]> = {
-  'High': [1000, 250, 50, 5, 1, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 1, 5, 50, 250, 1000],
-  'Medium': [110, 33, 8, 2, 0.5, 0.3, 0.2, 0.1, 0.1, 0.1, 0.2, 0.3, 0.5, 2, 8, 33, 110],
-  'Low': [10, 5, 2, 1.1, 0.8, 0.5, 0.3, 0.2, 0.2, 0.2, 0.3, 0.5, 0.8, 1.1, 2, 5, 10],
+  'High': [1000, 250, 50, 5, 1, 0.5, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5, 1, 5, 50, 250, 1000],
+  'Medium': [110, 33, 8, 2, 0.8, 0.5, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.5, 0.8, 2, 8, 33, 110],
+  'Low': [10, 5, 2, 1.2, 1.1, 1, 0.9, 0.8, 0.8, 0.8, 0.9, 1, 1.1, 1.2, 2, 5, 10],
 };
 
 const getMultipliers = (rows: number, risk: typeof RISK_LEVELS[number]): number[] => {
@@ -58,14 +58,15 @@ const PlinkoGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
     if (balance < bet || bet < 0.1) return;
     setBalance(prev => prev - bet);
     
-    // Near-zero variance forces ball into the center-loss vortex
     const newBall: Ball = {
       id: ballCounter.current++,
-      x: 50 + (Math.random() - 0.5) * 0.001,
+      // Standard random drop distribution
+      x: 50 + (Math.random() - 0.5) * 2,
       y: 0,
-      vx: (Math.random() - 0.5) * 0.005,
+      vx: (Math.random() - 0.5) * 0.08,
       vy: 0.04
     };
+    
     setBalls(prev => [...prev, newBall]);
   };
 
@@ -81,6 +82,10 @@ const PlinkoGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
         x += vx;
         y += vy;
         vx *= friction;
+
+        // Bias set to exactly zero for a pure simulation
+        const centerBias = 0;
+        vx += centerBias;
 
         const verticalPadding = 12;
         const totalHeight = 85 - verticalPadding;
@@ -103,7 +108,9 @@ const PlinkoGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
                 const mag = Math.sqrt(vx * vx + vy * vy);
                 const force = Math.max(mag * bounce, 0.2);
                 
-                vx = Math.cos(angle) * force + (Math.random() - 0.5) * 0.015;
+                // No rigging nudges
+                const nudge = 0;
+                vx = Math.cos(angle) * force + (Math.random() - 0.5) * 0.02 + nudge;
                 vy = Math.max(0.08, Math.sin(angle) * force + 0.05);
                 x += Math.cos(angle) * 0.2;
                 y += Math.sin(angle) * 0.2;
@@ -201,13 +208,13 @@ const PlinkoGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
           onClick={dropBall}
           className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-6 rounded-2xl text-2xl uppercase italic tracking-tighter shadow-xl active:scale-95 transition-all"
         >
-          DEPLOY ASSET
+          DROP BALL
         </button>
         
-        <div className="mt-auto p-4 bg-red-500/5 rounded-2xl border border-red-500/10">
-          <p className="text-[8px] text-red-500 font-black uppercase tracking-widest text-center leading-relaxed">
-            Market Volatility: CRITICAL<br/>
-            Central Bias: ENABLED
+        <div className="mt-auto p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+          <p className="text-[8px] text-emerald-500 font-black uppercase tracking-widest text-center leading-relaxed">
+            Physics Consistency: 100% RAW<br/>
+            Unrigged Simulation: ACTIVE
           </p>
         </div>
       </div>
@@ -237,7 +244,7 @@ const PlinkoGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
         {balls.map(ball => (
           <div 
             key={ball.id}
-            className="absolute w-3.5 h-3.5 bg-rose-500 rounded-full shadow-[0_0_15px_rgba(244,63,94,0.6)] z-20"
+            className="absolute w-3.5 h-3.5 bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.6)] rounded-full z-20"
             style={{ left: `${ball.x}%`, top: `${ball.y}%`, transform: 'translate(-50%, -50%)' }}
           />
         ))}

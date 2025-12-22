@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface Props {
@@ -21,12 +22,13 @@ const SlotMachine: React.FC<Props> = ({ balance, setBalance, onWin }) => {
     setBalance(prev => prev - bet);
     setLastResult(null);
     
-    const newResults = [
+    let newResults = [
       Math.floor(Math.random() * SYMBOLS.length),
       Math.floor(Math.random() * SYMBOLS.length),
       Math.floor(Math.random() * SYMBOLS.length)
     ];
 
+    // No rigging probability - purely random symbols
     const currentBase = reelPositions.map(pos => pos % SYMBOLS.length);
     setReelPositions(currentBase);
     setIsSpinning([true, true, true]);
