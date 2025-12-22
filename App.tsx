@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { UserProfile, SystemConfig } from './types';
 import CasinoView from './components/CasinoView';
 import AuthView from './components/AuthView';
@@ -146,6 +147,7 @@ const App: React.FC = () => {
 
   return (
     <>
+      <Analytics />
       {systemAlert && (
         <div className="bg-amber-500 text-black py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.3em] fixed top-0 w-full z-[100] shadow-xl">
           System Alert: {systemAlert}
