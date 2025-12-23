@@ -180,7 +180,7 @@ const BlackjackGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
               />
             </div>
             <button onClick={startNewGame} className="w-full md:flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl shadow-xl transition-all h-[68px] uppercase italic tracking-tighter text-2xl">
-              Start Deal
+              Initiate Deal
             </button>
           </div>
         ) : (

@@ -208,7 +208,7 @@ const PlinkoGame: React.FC<Props> = ({ balance, setBalance, onWin }) => {
           onClick={dropBall}
           className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-6 rounded-2xl text-2xl uppercase italic tracking-tighter shadow-xl active:scale-95 transition-all"
         >
-          DROP BALL
+          DEPLOY ASSET
         </button>
         
         <div className="mt-auto p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
